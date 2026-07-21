@@ -4,10 +4,15 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.ext.declarative import declarative_base
 from loguru import logger
 from sqlalchemy.orm import DeclarativeBase
-
 load_dotenv()
 
-sqlalchemy_url = os.getenv("SQLALCHEMY_DATABASE_URI")
+USER_DB = os.getenv("USER_DB")
+PASSWORD_DB = os.getenv("PASSWORD_DB")
+HOST_DB = os.getenv("HOST_DB")
+PORT_DB = os.getenv("PORT_DB")
+DB_NAME = os.getenv("DB_NAME")
+
+sqlalchemy_url = f'postgresql+asyncpg://{USER_DB}:{PASSWORD_DB}@{HOST_DB}:{PORT_DB}/{DB_NAME}'
 engine = create_async_engine(sqlalchemy_url, pool_pre_ping=True, echo=False)
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,

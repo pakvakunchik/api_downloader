@@ -4,15 +4,17 @@ from sqlalchemy import pool
 from alembic import context
 from app.database import Base
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, load_dotenv
+load_dotenv()
 from sqlalchemy import create_engine
 from app.database import Base
 from logging.config import fileConfig
 from app.models import Candidates, File, DownloadProgress
 
-
-load_dotenv()
 async_url = os.getenv("SQLALCHEMY_DATABASE_URI")
+if not async_url:
+    raise ValueError("SQLALCHEMY_DATABASE_URI environment variable not set.")
+
 sync_url = async_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
 
 # this is the Alembic Config object, which provides
