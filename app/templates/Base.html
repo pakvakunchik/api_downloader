@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Скачивание данных</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; }
+        button { font-size: 1.2em; padding: 10px 20px; }
+        #status { margin-top: 20px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>Скачивание каталога</h1>
+    <button id="startBtn">Скачать данные</button>
+    <div id="status">Нажмите кнопку для начала.</div>
+
+    <script>
+        document.getElementById('startBtn').addEventListener('click', async function() {
+            this.disabled = true;
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = 'Запуск процесса...';
+
+            try {
+                const response = await fetch('/start-download', { method: 'POST' });
+                const result = await response.json();
+                statusDiv.innerText = JSON.stringify(result, null, 2);
+            } catch (e) {
+                statusDiv.innerText = 'Ошибка: ' + e.message;
+            } finally {
+                this.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

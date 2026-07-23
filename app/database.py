@@ -30,4 +30,6 @@ async def get_db():
             yield session
         except Exception:
             logger.error(f'database error:', exc_info=True)
-        raise
+        finally:
+            await session.close()
+

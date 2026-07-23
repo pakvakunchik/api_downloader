@@ -9,7 +9,7 @@ load_dotenv()
 from sqlalchemy import create_engine
 from app.database import Base
 from logging.config import fileConfig
-from app.models import Candidates, File, DownloadProgress
+from app.models import File, DownloadProgress, DownloadedFiles
 
 async_url = os.getenv("SQLALCHEMY_DATABASE_URI")
 if not async_url:

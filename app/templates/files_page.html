@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Скачанные файлы</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        .pagination { margin: 15px 0; }
+        .pagination button { margin: 0 5px; }
+        #stats { margin-top: 20px; border: 1px solid #aaa; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Скачанные файлы</h1>
+    <div>
+        <button id="selectAll">Выбрать все</button>
+        <button id="clearAll">Снять все</button>
+        <button id="calculateBtn">Произвести расчёты</button>
+    </div>
+    <table>
+        <thead><tr><th><input type="checkbox" id="selectAllCheckbox"></th><th>Имя файла</th><th>Время скачивания</th></tr></thead>
+        <tbody id="filesBody"></tbody>
+    </table>
+    <div class="pagination">
+        <button id="prevPage">←</button>
+        <span id="pageInfo">Страница 1</span>
+        <button id="nextPage">→</button>
+    </div>
+    <div id="stats">Здесь появятся результаты расчётов.</div>
+
+    <script>
+        let currentPage = 1;
+        const perPage = 20;
+        let allFileIds = [];
+
+        async function loadFiles(page) {
+            const response = await fetch(`/files?page=${page}&per_page=${perPage}`);
+            const data = await response.json();
+            const tbody = document.getElementById('filesBody');
+            tbody.innerHTML = '';
+            allFileIds = data.items.map(f => f.id);
+            data.items.forEach(file => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="fileCheckbox" value="${file.id}"></td>
+                    <td>${file.name}</td>
+                    <td>${new Date(file.downloaded_at).toLocaleString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('pageInfo').innerText = `Страница ${data.page} из ${Math.ceil(data.total / perPage)}`;
+            currentPage = data.page;
+            document.getElementById('selectAllCheckbox').checked = false;
+        }
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) loadFiles(currentPage - 1);
+        });
+        document.getElementById('nextPage').addEventListener('click', () => {
+            loadFiles(currentPage + 1);
+        });
+        document.getElementById('selectAllCheckbox').addEventListener('change', function() {
+            document.querySelectorAll('.fileCheckbox').forEach(cb => cb.checked = this.checked);
+        });
+        document.getElementById('selectAll').addEventListener('click', () => {
+            document.querySelectorAll('.fileCheckbox').forEach(cb => cb.checked = true);
+        });
+        document.getElementById('clearAll').addEventListener('click', () => {
+            document.querySelectorAll('.fileCheckbox').forEach(cb => cb.checked = false);
+        });
+        document.getElementById('calculateBtn').addEventListener('click', async () => {
+            const checked = document.querySelectorAll('.fileCheckbox:checked');
+            const ids = Array.from(checked).map(cb => parseInt(cb.value));
+            if (ids.length === 0) {
+                alert('Выберите хотя бы один файл');
+                return;
+            }
+            const response = await fetch('/calculate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ file_ids: ids })
+            });
+            const result = await response.json();
+            let html = '<h3>Общая статистика</h3><p>Цифры 0-9: ' + result.total_counts.join(', ') + '</p>';
+            html += '<h3>По файлам</h3><ul>';
+            result.per_file.forEach(f => {
+                html += `<li>${f.file_name}: ${f.counts.join(', ')}</li>`;
+            });
+            html += '</ul>';
+            document.getElementById('stats').innerHTML = html;
+        });
+        loadFiles(1);
+    </script>
+</body>
+</html>
