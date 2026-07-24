@@ -9,23 +9,6 @@ from app.constants import CANDIDATE_ID, BASE_URL_DOWNLOADED
 from app.database import AsyncSessionLocal
 from app.models import File
 
-async def retrier_util(
-        func: Callable,
-        *args: Any,
-        retries: int = 3,
-        min_wait: int = 1,
-        max_wait: int = 10,
-        exception: tuple = (Exception,),
-        **kwargs: Any
-)-> Any:
-    retrier = AsyncRetrying(
-        stop=stop_after_attempt(retries),
-        wait=wait_exponential(multiplier=1, min=min_wait, max=max_wait),
-        retry=retry_if_exception_type(exception),
-        reraise=True,
-    )
-
-
 async def fetch_names(url):
     try:
         async with httpx.AsyncClient() as client:

@@ -15,7 +15,7 @@ class File(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    downloaded_at: Mapped[datetime] = mapped_column(server_default=text("NOW() AT TIME ZONE 'Asia/Novosibirsk'"))
+    downloaded_at: Mapped[datetime] = mapped_column(default=func.now(), onupdate=func.now())
     zip_data: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey('downloaded_files.id'), index=True, nullable=True)
 
 class DownloadProgress(Base):

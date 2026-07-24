@@ -35,3 +35,6 @@ class FileStats(BaseModel):
 class CalculationResponse(BaseModel):
     total_counts: List[int]
     per_file: List[FileStats]
+
+class CalculateRequest(BaseModel):
+    file_ids: Optional[List[int]] = None

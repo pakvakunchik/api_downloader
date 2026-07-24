@@ -28,8 +28,11 @@ async def get_db():
     async with AsyncSessionLocal() as session:
         try:
             yield session
-        except Exception:
-            logger.error(f'database error:', exc_info=True)
+            await session.commit()
+        except Exception as e:
+            await session.rollback()
+            logger.error(f"database error: {e!r}", exc_info=True)
+            raise
         finally:
             await session.close()
 
